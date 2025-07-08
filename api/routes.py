@@ -96,3 +96,32 @@ class MovieResource(Resource):
             return jsonify({"count": len(movies), "movies": movies})
         except Exception as e:
             api.abort(500, f"Internal Server Error: {str(e)}")
+
+@api.route('/movies/from_year=<int:start_year>to_year=<int:end_year>')
+class MoviesRangeYear(Resource):
+    @api.response(500, 'Internal Server Error')
+    @api.response(200, 'Success')
+    def get(self, start_year, end_year):
+        ''' Get movies released within a specific year range '''
+        try:
+            movies = Movies.query.filter(Movies.release_year>=start_year, Movies.release_year<=end_year)
+            movies = [movie.to_dict for movie in movies]
+            return jsonify({"count": len(movies), "movies": movies})
+        except Exception as e:
+            api.abort(500, f"Internal Server Error: {str(e)}")
+
+@api.route('/movies/<string:title>')
+class MovieResourceByTitle(Resource):
+    @api.response(404, 'Movie not Found')
+    @api.response(200, 'Success')
+    @api.response(500, 'Internal Server Error')
+    def get(self, title):
+        ''' Get a movie by title'''
+        try:
+            movie = Movies.query.filter(Movies.title==title).first()
+            if movie:
+                return jsonify(movie.to_dict)
+            else:
+                return {"message": "The movie you are looking for is not found", "type": "error"}, 404
+        except Exception as e:
+            api.abort(500, message="Internal Server Error", type="error")
