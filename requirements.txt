@@ -1,0 +1,4 @@
+pytest
+flask_restx
+flask_sqlalchemy
+flask
